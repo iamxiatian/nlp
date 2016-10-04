@@ -59,7 +59,7 @@ object HTTP extends ServerApp {
                       port: Int = 8080,
                       path: String = "/api")
 
-    val parser = new scopt.OptionParser[Config]("scopt") {
+    val parser = new scopt.OptionParser[Config]("HTTP API") {
       head("Web Article Extractor", "2.8")
 
       opt[String]('h', "host").action((x, c) =>
