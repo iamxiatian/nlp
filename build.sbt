@@ -8,12 +8,12 @@ cancelable in Global := true
 
 libraryDependencies  ++= Seq(
   // other dependencies here
-  "org.scalanlp" %% "breeze" % "0.12",
+//  "org.scalanlp" %% "breeze" % "0.12",
   // native libraries are not included by default. add this if you want them (as of 0.7)
   // native libraries greatly improve performance, but increase jar sizes. 
   // It also packages various blas implementations, which have licenses that may or may not
   // be compatible with the Apache License. No GPL code, as best I know.
-  "org.scalanlp" %% "breeze-natives" % "0.12"
+//  "org.scalanlp" %% "breeze-natives" % "0.12"
 
   // the visualization library is distributed separately as well. 
   // It depends on LGPL code.
@@ -27,6 +27,9 @@ libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-blaze-server" % http4sVersion
 //  "org.http4s" % "http4s-blaze-client" % http4sVersion
 )
+
+//for http post test
+//libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.3.0"
 
 //command line parser
 libraryDependencies += "com.github.scopt" %% "scopt" % "3.5.0"

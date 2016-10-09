@@ -21,16 +21,25 @@ object ExtractQueryParamMatcher extends QueryParamDecoderMatcher[String]("url")
 
 object ExtractService {
 
-  def extractArticleTask(url: String): Task[String] = Task {
+  def extractArticleByUrlTask(url: String): Task[String] = Task {
     println("fetching " + url)
     val article = WebExtractor.extractArticle(url)
     article.toXML
   }.handleWith {
+    case e: Throwable => Task.now((<error>{e}</error>) toString)
+  }
+
+  def extractArticleByContentTask(url: String, content:String): Task[String] = Task {
+    println(s"fetching $url by provided content...")
+    val article = WebExtractor.extractArticle(url, content)
+    article.toXML
+  }.handleWith {
     case e: Throwable =>
-      e.printStackTrace
       Task.now({
         <error>
-          {e}
+          <message>{e}</message>
+          <url>{url}</url>
+          <content>{content}</content>
         </error>
       }.toString)
   }
@@ -40,13 +49,30 @@ object ExtractService {
       Ok(Task {"""<p>接口：/api/extract?url=xxx</p>"""})
         .withContentType(Some(`Content-Type`(`text/html`)))
 
-    case request@GET -> Root / "extract" :? ExtractQueryParamMatcher(url) =>
-      Ok(extractArticleTask(url).run)
-        .putHeaders(`Content-Type`(`text/xml`))
+    case request@POST -> Root / "extract" =>
+      //val inputStream = scalaz.stream.io.toInputStream(request.body)
+      val body:String = EntityDecoder.decodeString(request).run //获取传递的内容
+      //按行分割
+      val lines = body.split("\n").toList
+      lines match {
+        //如果以http开始
+        case x::xs if x.toLowerCase.startsWith("http") => Ok(extractArticleByContentTask(x, xs.mkString("\n")).run)
 
-    //    case GET -> Root / "extract" /url => {
-    //      Ok(s"Extract from $url.")
-    //    }
+        case x => Ok( Task.now({<error>
+          <message>"""说明：POST的文本内容格式，第一行为URL地址，后面为该URL对应的网页源代码，例如：
+          http://www.test.com/article01.html
+          <html>
+            html content...
+          </html>
+          """
+          </message>
+          <received>{x}</received>
+        </error>} toString))
+      }
+
+    case request@GET -> Root / "extract" :? ExtractQueryParamMatcher(url) =>
+      Ok(extractArticleByUrlTask(url).run)
+        .putHeaders(`Content-Type`(`text/xml`))
     case _ => Ok(Task {
       "echo!"
     })

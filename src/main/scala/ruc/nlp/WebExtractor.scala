@@ -14,4 +14,10 @@ object WebExtractor {
     articleExtractor.extracting(url)
     articleExtractor.getArticle
   }
+
+  def extractArticle(url: String, content:String): Article = {
+    val articleExtractor:ArticleExtractor = new ArticleExtractorImpl(new org.zhinang.conf.Configuration)
+    articleExtractor.extracting(url, content)
+    articleExtractor.getArticle
+  }
 }
