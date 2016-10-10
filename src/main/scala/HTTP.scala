@@ -25,7 +25,8 @@ object ExtractService {
     println("fetching " + url)
     val article = WebExtractor.extractArticle(url)
     article.toXML
-  }.handleWith {
+  }.timed(5000).handleWith {
+    case e: java.util.concurrent.TimeoutException => Task.now((<error>{e}</error>) toString)
     case e: Throwable => Task.now((<error>{e}</error>) toString)
   }
 
@@ -33,7 +34,8 @@ object ExtractService {
     println(s"fetching $url by provided content...")
     val article = WebExtractor.extractArticle(url, content)
     article.toXML
-  }.handleWith {
+  }.timed(4000).handleWith {
+    case e: java.util.concurrent.TimeoutException => Task.now((<error>{e}</error>) toString)
     case e: Throwable =>
       Task.now({
         <error>
