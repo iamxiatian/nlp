@@ -1,5 +1,7 @@
 import java.util.concurrent.Executors
 
+import scala.xml.XML
+
 import org.http4s.MediaType.{`text/html`, `text/xml`}
 import org.http4s._
 import org.http4s.dsl._
@@ -51,6 +53,41 @@ object ExtractService {
       }.toString)
   }
 
+  /**
+    * 执行挖掘任务，要求输入的文档内容格式为：
+    * <article>
+    *   <title>中国人民大学信息资源管理学院</title>
+    *   <content>中国人民大学在中关村大街59号</content>
+    * </article>
+    */
+  def miningArticleTask(body: String): Task[String] = Task {
+    val doc = XML.loadString(body)
+    val title = (doc \\ "title").text
+    val content = (doc \\ "content").text
+
+    {<result>
+        <keyword>{title}</keyword>
+        <finger>233</finger>
+        <sentiment>0.2</sentiment>
+      </result>
+    }.toString
+  }.timed(2 second).handleWith {
+    case e: java.util.concurrent.TimeoutException => Task.now((<error>
+      {e}
+    </error>) toString)
+    case e: Throwable =>
+      Task.now({
+        <error>
+          <message>
+            {e}
+          </message>
+          <received>
+            {body}
+          </received>
+        </error>
+      }.toString)
+  }
+
   val service = HttpService {
     case req@GET -> Root =>
       Ok(Task {"""<p>接口：/api/extract?url=xxx</p>"""})
@@ -65,7 +102,7 @@ object ExtractService {
         //如果以http开始
         case x::xs if x.toLowerCase.startsWith("http") => Ok(extractArticleByContentTask(x, xs.mkString("\n")).run)
 
-        case x => Ok( Task.now({<error>
+        case _ => Ok( Task.now({<error>
           <message>"""说明：POST的文本内容格式，第一行为URL地址，后面为该URL对应的网页源代码，例如：
           http://www.test.com/article01.html
           <html>
@@ -73,13 +110,20 @@ object ExtractService {
           </html>
           """
           </message>
-          <received>{x}</received>
+          <received>{body}</received>
         </error>} toString))
       }
 
     case request@GET -> Root / "extract" :? ExtractQueryParamMatcher(url) =>
       Ok(extractArticleByUrlTask(url).run)
         .putHeaders(`Content-Type`(`text/xml`))
+
+      //根据传入的XML格式的文章标题和正文，进行关键词提取/指纹处理等任务。
+    case request@POST -> Root / "mining" =>
+      val body:String = EntityDecoder.decodeString(request).run //获取传递的内容
+      Ok(miningArticleTask(body).run)
+        .putHeaders(`Content-Type`(`text/xml`))
+
     case _ => Ok(Task {
       "echo!"
     })
