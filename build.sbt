@@ -33,7 +33,7 @@ libraryDependencies ++= Seq(
 //libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.3.0"
 
 //command line parser
-libraryDependencies += "com.github.scopt" % "scopt" % "3.5.0"
+libraryDependencies += "com.github.scopt" %% "scopt" % "3.5.0"
 
 //add jars for zhinang modules
 libraryDependencies += "commons-cli" % "commons-cli" % "1.2"

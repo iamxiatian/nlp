@@ -1,3 +1,5 @@
+import java.util.concurrent.Executors
+
 import org.http4s.MediaType.{`text/html`, `text/xml`}
 import org.http4s._
 import org.http4s.dsl._
@@ -7,6 +9,8 @@ import org.http4s.server.{Server, ServerApp}
 import ruc.nlp._
 
 import scalaz.concurrent.Task
+import scala.concurrent.duration._
+
 
 object MyService {
   val service = HttpService {
@@ -20,12 +24,13 @@ object MyService {
 object ExtractQueryParamMatcher extends QueryParamDecoderMatcher[String]("url")
 
 object ExtractService {
+  implicit val scheduledThreadPool = Executors.newScheduledThreadPool(5)
 
   def extractArticleByUrlTask(url: String): Task[String] = Task {
     println("fetching " + url)
     val article = WebExtractor.extractArticle(url)
     article.toXML
-  }.timed(5000).handleWith {
+  }.timed(5 second).handleWith {
     case e: java.util.concurrent.TimeoutException => Task.now((<error>{e}</error>) toString)
     case e: Throwable => Task.now((<error>{e}</error>) toString)
   }
@@ -34,7 +39,7 @@ object ExtractService {
     println(s"fetching $url by provided content...")
     val article = WebExtractor.extractArticle(url, content)
     article.toXML
-  }.timed(4000).handleWith {
+  }.timed(3 second).handleWith {
     case e: java.util.concurrent.TimeoutException => Task.now((<error>{e}</error>) toString)
     case e: Throwable =>
       Task.now({
