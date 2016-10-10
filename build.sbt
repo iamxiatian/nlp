@@ -20,7 +20,7 @@ libraryDependencies  ++= Seq(
   // "org.scalanlp" %% "breeze-viz" % "0.12"
 )
 
-val http4sVersion = "0.14.7"
+lazy val http4sVersion = "0.14.7"
 //val http4sVersion = "0.15.0a-SNAPSHOT"
 libraryDependencies ++= Seq(
   //"com.chuusai" %% "shapeless" % "2.3.2",
@@ -31,8 +31,6 @@ libraryDependencies ++= Seq(
 
 //for http post test
 //libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.3.0"
-
-libraryDependencies += "" %% "scopt" % "3.5.0"
 
 //command line parser
 libraryDependencies += "com.github.scopt" % "scopt" % "3.5.0"
