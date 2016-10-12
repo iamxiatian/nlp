@@ -52,6 +52,7 @@ libraryDependencies += "xalan" % "xalan" % "2.7.1"
 
 //NLP libraries
 libraryDependencies += "com.hankcs" % "hanlp" % "portable-1.2.11"
+libraryDependencies += "org.ahocorasick" % "ahocorasick" % "0.3.0"
 
 //HTML Process
 libraryDependencies += "org.jsoup" % "jsoup" % "1.9.2"
