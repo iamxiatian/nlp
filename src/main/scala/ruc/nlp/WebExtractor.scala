@@ -10,7 +10,9 @@ import org.zhinang.extract.auto.impl.ArticleExtractorImpl
   * @author <a href="mailto:xiat@ruc.edu.cn">Tian Xia</a>
   */
 object WebExtractor {
-  val conf = ExtractorConf.create.setBoolean("extractor.mining.sentiment", true)
+  val conf = ExtractorConf.create
+    .setBoolean("extractor.mining.sentiment", true)
+    .setInt("extractor.keywords.topN", 15)
 
   def extractArticle(url: String): Article = {
     val articleExtractor:ArticleExtractor = new ArticleExtractorImpl(conf)
