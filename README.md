@@ -18,7 +18,14 @@ $ sbt
 $ cd nlp
 $ sbt assembly
 $ cd target/scala-2.11
-$ nohup scala -J-Xmx3G nlp.jar -a /zhinang/servlet -h 0.0.0.0 &
+$ nohup scala -J-Xmx3G nlp.jar -h 0.0.0.0 &
 ```
 
-If `browse` doesn't launch your browser, manually open [http://localhost:8080/api/extract?url=http://news.ifeng.com/a/20161003/50058514_0.shtml](http://localhost:8080/api/extract?url=http://news.ifeng.com/a/20161003/50058514_0.shtml) in your browser.
+测试抽取效果：
+
+http://localhost:8080/api/extract?url=http://news.ifeng.com/a/20161003/50058514_0.shtml
+
+测试抽取并转换为PDF效果：
+
+http://localhost:8080/api/aspdf?url=http://news.ifeng.com/a/20161003/50058514_0.shtml
+
