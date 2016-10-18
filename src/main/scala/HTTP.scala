@@ -1,6 +1,6 @@
 import java.util.concurrent.Executors
 
-import org.http4s.MediaType.{`text/html`, `text/xml`}
+import org.http4s.MediaType.{`text/html`, `text/xml`, `application/pdf` }
 import org.http4s._
 import org.http4s.dsl._
 import org.http4s.headers.`Content-Type`
@@ -141,6 +141,41 @@ object ExtractService {
     case request@GET -> Root / "extract" :? ExtractQueryParamMatcher(url) =>
       Ok(extractArticleByUrlTask(url).run)
         .putHeaders(`Content-Type`(`text/xml`))
+
+    case request@GET -> Root / "aspdf" :? ExtractQueryParamMatcher(url) =>
+      Ok{
+        //把抽取结果以pdf方式输出，需要事先安装wkhtmltopdf： http://wkhtmltopdf.org/
+        import io.github.cloudify.scala.spdf._
+        val pdf = Pdf(new PdfConfig {
+          //orientation := Landscape
+          orientation := Portrait
+          pageSize := "Letter"
+          marginTop := "1in"
+          marginBottom := "1in"
+          marginLeft := "1in"
+          marginRight := "1in"
+        })
+
+        val html = Task{
+          val article = WebExtractor.extractArticle(url)
+
+          s"""<html>
+              <head><title>${article getTitle}</title></head>
+              <body>
+                <center><h1 style="font-size:24px;font-family: Microsoft Yahei;">${article getTitle}</h1></center>
+                <p style="color:gray;">${article.getKeywords}</p>
+                <span style="font-size:16px;line-height:1.6;">
+                ${article getFormattedContent}
+                <span>
+              </body>
+          </html>"""
+        }.run
+        println("HTML:" + html)
+        val outputStream = new java.io.ByteArrayOutputStream
+        pdf.run(html, outputStream)
+        outputStream.close()
+        outputStream.toByteArray
+      }.putHeaders(`Content-Type`(`application/pdf`))
 
     //根据传入的XML格式的文章标题和正文，进行关键词提取/指纹处理等任务。
     case request@POST -> Root / "mining" =>

@@ -58,6 +58,8 @@ libraryDependencies += "org.ahocorasick" % "ahocorasick" % "0.3.0"
 libraryDependencies += "org.jsoup" % "jsoup" % "1.9.2"
 //libraryDependencies += "com.squareup.okhttp3" % "okhttp" % "3.4.1"
 
+libraryDependencies += "io.github.cloudify" %% "spdf" % "1.3.1"
+
 scalacOptions in Test ++= Seq("-Yrangepos")
 
 resolvers ++= Seq(
