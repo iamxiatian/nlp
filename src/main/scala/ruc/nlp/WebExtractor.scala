@@ -37,7 +37,9 @@ object WebExtractor {
 
   def fingerprint(title: String, content: String) = {
     val keywordExtractor = new KeywordExtractor(conf, false)
-    Fingerprint.fingerprint(title, keywordExtractor.extractAsList(title, content, 5))
+    //Fingerprint.fingerprint(title, keywordExtractor.extractAsList(title, content, 5))
+    //只用标题计算指纹
+    Fingerprint.fingerprint(title, keywordExtractor.extractAsList(title, title, 5))
   }
 
   def sentiment(title:String, content: String) = {
