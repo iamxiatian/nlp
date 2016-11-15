@@ -1,7 +1,7 @@
 import java.util.concurrent.Executors
 
-import org.http4s.MediaType.{`text/html`, `text/xml`, `application/pdf` }
-import org.http4s._
+import org.http4s.MediaType.{`application/pdf`, `text/html`, `text/xml`}
+import org.http4s.{MediaType, _}
 import org.http4s.dsl._
 import org.http4s.headers.`Content-Type`
 import org.http4s.server.blaze._
@@ -22,7 +22,8 @@ object MyService {
   }
 }
 
-object ExtractQueryParamMatcher extends QueryParamDecoderMatcher[String]("url")
+object ExtractUrlQueryParamMatcher extends QueryParamDecoderMatcher[String]("url")
+object ExtractRefQueryParamMatcher extends QueryParamDecoderMatcher[String]("ref")
 
 object ExtractService {
   implicit val scheduledThreadPool = Executors.newScheduledThreadPool(5)
@@ -138,11 +139,11 @@ object ExtractService {
         } toString))
       }
     }
-    case request@GET -> Root / "extract" :? ExtractQueryParamMatcher(url) =>
+    case request@GET -> Root / "extract" :? ExtractUrlQueryParamMatcher(url) =>
       Ok(extractArticleByUrlTask(url).run)
         .putHeaders(`Content-Type`(`text/xml`))
 
-    case request@GET -> Root / "aspdf" :? ExtractQueryParamMatcher(url) =>
+    case request@GET -> Root / "aspdf" :? ExtractUrlQueryParamMatcher(url) =>
       Ok{
         //把抽取结果以pdf方式输出，需要事先安装wkhtmltopdf： http://wkhtmltopdf.org/
         import io.github.cloudify.scala.spdf._
@@ -182,6 +183,14 @@ object ExtractService {
       val body: String = EntityDecoder.decodeString(request).run //获取传递的内容
       Ok(miningArticleTask(body).run)
         .putHeaders(`Content-Type`(`text/xml`))
+
+    case request@GET -> Root / "fetch" :? ExtractUrlQueryParamMatcher(url)  +& ExtractRefQueryParamMatcher(refer) =>
+      var mediaType = `Content-Type`(`text/html`)
+      Ok{
+        val (contentType, content) = WebExtractor.fetch(url, refer)
+        mediaType = `Content-Type`.parse(contentType).getOrElse(`Content-Type`(`text/html`))
+        content
+      }.timed(3 seconds).putHeaders(mediaType)
 
     case _ => Ok(Task {
       "echo!"

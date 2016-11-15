@@ -1,11 +1,12 @@
 package ruc.nlp
 
 import org.zhinang.extract.ExtractorConf
-import org.zhinang.extract.auto.{ArticleExtractor, Article}
+import org.zhinang.extract.auto.{Article, ArticleExtractor}
 import org.zhinang.extract.auto.impl.ArticleExtractorImpl
 import org.zhinang.nlp.keyword.KeywordExtractor
 import org.zhinang.nlp.similarity.Fingerprint
 import org.zhinang.nlp.sentiment.SentimentParser
+import org.zhinang.protocol.http.HttpClientAgent
 
 /**
   * 自动抽取的Scala包装器
@@ -17,6 +18,8 @@ object WebExtractor {
     .setBoolean("extractor.mining.sentiment", true)
     .setBoolean("nlp.keyword.show.tf", true)
     .setInt("extractor.keywords.topN", 15)
+
+  val client = new HttpClientAgent(conf)
 
   def extractArticle(url: String): Article = {
     val articleExtractor:ArticleExtractor = new ArticleExtractorImpl(conf)
@@ -33,6 +36,11 @@ object WebExtractor {
   def extractKeywords(title: String, content: String) = {
     val keywordExtractor = new KeywordExtractor(conf)
     keywordExtractor.extractAsString(title, content, conf.getInt("extractor.keywords.topN", 10))
+  }
+
+  def fetch(url:String, refer: String) = {
+    val response = client.execute(url, refer)
+    (response.getContentType, response.getContent)
   }
 
   def fingerprint(title: String, content: String) = {
