@@ -29,3 +29,6 @@ http://localhost:8080/api/extract?url=http://news.ifeng.com/a/20161003/50058514_
 
 http://localhost:8080/api/aspdf?url=http://news.ifeng.com/a/20161003/50058514_0.shtml
 
+代理抓取，即传入url和refer，把内容抓取下来，当需要通过该服务器做代理抓取网页内容时，可以使用该功能：
+
+http://localhost:8080/api/fetch?url=http://www.baidu.com/img/bd_logo1.png&ref=http://www.baidu.com/
