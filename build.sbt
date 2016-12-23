@@ -69,6 +69,19 @@ resolvers ++= Seq(
   "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 )
 
+
+//native package
+import NativePackagerHelper._
+enablePlugins(JavaServerAppPackaging)
+mainClass in Compile := Some("HTTP")
+
+javaOptions in Universal ++= Seq(
+  // -J params will be added as jvm parameters
+  "-J-Xms2048m",
+  "-J-Xmx8g"
+)
+
+
 assemblyJarName in assembly := "nlp.jar"
 test in assembly := {}
 mainClass in assembly := Some("HTTP")
